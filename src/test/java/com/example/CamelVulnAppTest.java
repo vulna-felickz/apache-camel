@@ -122,5 +122,36 @@ public class CamelVulnAppTest {
         assertThat(camelContext.getRoute("producer-template-entry")).isNotNull();
         assertThat(camelContext.getRoute("unsafe-deserialization")).isNotNull();
         assertThat(camelContext.getRoute("producer-send-body-and-headers")).isNotNull();
+        // New routes: explicit Processor + @Autowired ProducerTemplate
+        assertThat(camelContext.getRoute("processor-sql-injection")).isNotNull();
+        assertThat(camelContext.getRoute("processor-notify")).isNotNull();
+        assertThat(camelContext.getRoute("autowired-template-trigger")).isNotNull();
+        assertThat(camelContext.getRoute("autowired-template-request-body")).isNotNull();
+        assertThat(camelContext.getRoute("eval-expr-sink")).isNotNull();
+    }
+
+    @Test
+    public void processorSqlInjectionRouteIsReachable() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("id", "1");
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl() + "/lookup",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                String.class);
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertThat(response.getBody()).contains("SELECT");
+    }
+
+    @Test
+    public void autowiredTemplateTriggerRouteIsReachable() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+        headers.set("X-Target", "logData");
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                baseUrl() + "/trigger",
+                new HttpEntity<>("hello", headers),
+                String.class);
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
     }
 }

@@ -15,7 +15,7 @@ import java.nio.file.Paths;
  * Demonstrates:
  *   - Exchange#getMessage()
  *   - Message#getHeader(String, Class)
- *   - Message#getHeader(String)
+ *   - Message#getHeader(String)        (untyped overload — returns Object)
  *   - Message#setBody(Object)
  */
 @Component
@@ -41,7 +41,8 @@ public class PathTraversalRoute extends RouteBuilder {
             .process(exchange -> {
                 Message message = exchange.getMessage();
                 // VULN: filename from request used to build file path
-                String filename = message.getHeader("filename", String.class);
+                // getHeader(String) — untyped overload, returns Object; cast to String
+                String filename = (String) message.getHeader("filename");
                 File file = new File("/uploads/" + filename);
                 message.setBody(file.exists() ? new String(Files.readAllBytes(file.toPath())) : "not found");
             });

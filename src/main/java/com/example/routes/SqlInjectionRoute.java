@@ -18,7 +18,8 @@ import java.util.List;
  * Demonstrates:
  *   - Exchange#getMessage()
  *   - Message#getBody(Class)
- *   - Message#getHeader(String)
+ *   - Message#getHeader(String)        (untyped overload — returns Object)
+ *   - Message#getHeader(String, Class)
  *   - Message#setBody(Object)
  */
 @Component
@@ -38,7 +39,8 @@ public class SqlInjectionRoute extends RouteBuilder {
             .process(exchange -> {
                 Message message = exchange.getMessage();
                 // VULN: user input from query param flows into raw SQL
-                String name = message.getHeader("name", String.class);
+                // getHeader(String) — untyped overload, returns Object; cast to String
+                String name = (String) message.getHeader("name");
                 String sql = "SELECT * FROM users WHERE name = '" + name + "'";
                 List<String> results = new ArrayList<>();
                 try (Connection conn = dataSource.getConnection();
