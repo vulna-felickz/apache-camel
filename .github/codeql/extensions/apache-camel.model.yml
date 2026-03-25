@@ -1,0 +1,75 @@
+extensions:
+  - addsTo:
+      pack: codeql/java-all
+      extensible: sourceModel
+    data:
+      # Exchange — the data carrier in Camel routes; data enters via getMessage/getIn
+      - ["org.apache.camel", "Exchange", False, "getMessage", "()", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Exchange", False, "getIn", "()", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Exchange", False, "getProperty", "(String)", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Exchange", False, "getProperty", "(String,Class)", "", "ReturnValue", "remote", "manual"]
+      # Message — primary data access interface for reading body and headers
+      - ["org.apache.camel", "Message", False, "getBody", "()", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Message", False, "getBody", "(Class)", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Message", False, "getHeader", "(String)", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Message", False, "getHeader", "(String,Class)", "", "ReturnValue", "remote", "manual"]
+      - ["org.apache.camel", "Message", False, "getHeaders", "()", "", "ReturnValue", "remote", "manual"]
+  - addsTo:
+      pack: codeql/java-all
+      extensible: sinkModel
+    data:
+      # ProducerTemplate — endpoint URI argument is a request-forgery sink
+      - ["org.apache.camel", "ProducerTemplate", True, "sendBody", "(String,Object)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "sendBodyAndHeader", "(String,Object,String,Object)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "sendBodyAndHeaders", "(String,Object,Map)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "send", "(String,Processor)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "send", "(String,ExchangePattern,Processor)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBody", "(String,Object)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBody", "(String,Object,Class)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBodyAndHeader", "(String,Object,String,Object)", "", "Argument[0]", "request-forgery", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBodyAndHeaders", "(String,Object,Map)", "", "Argument[0]", "request-forgery", "manual"]
+      # FluentProducerTemplate — modern builder API, endpoint URI is a request-forgery sink
+      - ["org.apache.camel", "FluentProducerTemplate", True, "to", "(String)", "", "Argument[0]", "request-forgery", "manual"]
+  - addsTo:
+      pack: codeql/java-all
+      extensible: summaryModel
+    data:
+      # Exchange — taint propagation through exchange access
+      - ["org.apache.camel", "Exchange", True, "getMessage", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Exchange", True, "getIn", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Exchange", True, "getProperty", "(String)", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Exchange", True, "getProperty", "(String,Class)", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Exchange", True, "setProperty", "(String,Object)", "", "Argument[1]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel", "Exchange", True, "setMessage", "(Message)", "", "Argument[0]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel", "Exchange", True, "setIn", "(Message)", "", "Argument[0]", "Argument[this]", "taint", "manual"]
+      # Message — taint propagation through body and header access
+      - ["org.apache.camel", "Message", True, "getBody", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "getBody", "(Class)", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "setBody", "(Object)", "", "Argument[0]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "getHeader", "(String)", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "getHeader", "(String,Class)", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "setHeader", "(String,Object)", "", "Argument[1]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "getHeaders", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "Message", True, "setHeaders", "(Map)", "", "Argument[0]", "Argument[this]", "taint", "manual"]
+      # ExchangeBuilder — builder pattern: value flows for chaining, taint for data
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "withBody", "(Object)", "", "Argument[0]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "withBody", "(Object)", "", "Argument[this]", "ReturnValue", "value", "manual"]
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "withHeader", "(String,Object)", "", "Argument[1]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "withHeader", "(String,Object)", "", "Argument[this]", "ReturnValue", "value", "manual"]
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "withProperty", "(String,Object)", "", "Argument[1]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "withProperty", "(String,Object)", "", "Argument[this]", "ReturnValue", "value", "manual"]
+      - ["org.apache.camel.support.builder", "ExchangeBuilder", False, "build", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      # ProducerTemplate — request methods propagate body to response
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBody", "(String,Object)", "", "Argument[1]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBody", "(String,Object,Class)", "", "Argument[1]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBodyAndHeader", "(String,Object,String,Object)", "", "Argument[1]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "ProducerTemplate", True, "requestBodyAndHeaders", "(String,Object,Map)", "", "Argument[1]", "ReturnValue", "taint", "manual"]
+      # FluentProducerTemplate — builder pattern for chaining
+      - ["org.apache.camel", "FluentProducerTemplate", True, "withBody", "(Object)", "", "Argument[0]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "withBody", "(Object)", "", "Argument[this]", "ReturnValue", "value", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "withHeader", "(String,Object)", "", "Argument[1]", "Argument[this]", "taint", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "withHeader", "(String,Object)", "", "Argument[this]", "ReturnValue", "value", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "to", "(String)", "", "Argument[this]", "ReturnValue", "value", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "request", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "request", "(Class)", "", "Argument[this]", "ReturnValue", "taint", "manual"]
+      - ["org.apache.camel", "FluentProducerTemplate", True, "send", "()", "", "Argument[this]", "ReturnValue", "taint", "manual"]
